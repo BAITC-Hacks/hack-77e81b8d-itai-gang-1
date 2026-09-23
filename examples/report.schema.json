@@ -1,0 +1,234 @@
+{
+  "$defs": {
+    "Department": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "created",
+            "preserved",
+            "reorganized",
+            "removed"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "explanation",
+        "source_ids",
+        "status"
+      ],
+      "title": "Department",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title",
+        "explanation",
+        "source_ids"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "Function": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "preserved",
+            "transferred",
+            "lost",
+            "duplicated",
+            "new"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "before_units": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Before Units",
+          "type": "array"
+        },
+        "after_units": {
+          "items": {
+            "type": "string"
+          },
+          "title": "After Units",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title",
+        "explanation",
+        "source_ids",
+        "status",
+        "before_units",
+        "after_units"
+      ],
+      "title": "Function",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "document": {
+          "minLength": 1,
+          "title": "Document",
+          "type": "string"
+        },
+        "version": {
+          "enum": [
+            "before",
+            "after"
+          ],
+          "title": "Version",
+          "type": "string"
+        },
+        "location": {
+          "minLength": 1,
+          "title": "Location",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "document",
+        "version",
+        "location",
+        "text"
+      ],
+      "title": "Source",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "departments": {
+      "items": {
+        "$ref": "#/$defs/Department"
+      },
+      "title": "Departments",
+      "type": "array"
+    },
+    "functions": {
+      "items": {
+        "$ref": "#/$defs/Function"
+      },
+      "title": "Functions",
+      "type": "array"
+    },
+    "duplicates": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Duplicates",
+      "type": "array"
+    },
+    "conflicts": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Conflicts",
+      "type": "array"
+    },
+    "recommendations": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Recommendations",
+      "type": "array"
+    },
+    "conclusion": {
+      "$ref": "#/$defs/Finding"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/Source"
+      },
+      "title": "Sources",
+      "type": "array"
+    }
+  },
+  "required": [
+    "departments",
+    "functions",
+    "duplicates",
+    "conflicts",
+    "recommendations",
+    "conclusion",
+    "sources"
+  ],
+  "title": "AnalysisReport",
+  "type": "object"
+}
