@@ -16,6 +16,19 @@ python -m venv .venv
 Откройте http://localhost:8501. Остановить приложение: Ctrl+C в терминале.
 В VS Code выберите интерпретатор `.venv\Scripts\python.exe` через `Ctrl+Shift+P` → `Python: Select Interpreter`.
 
+## Ключи NIM
+
+Для режима «Документы» нужны `NVIDIA_API_KEY` и `NIM_MODEL`. Их можно задать перед запуском:
+
+```powershell
+$env:NVIDIA_API_KEY = "<ваш ключ>"
+$env:NIM_MODEL = "<модель NIM с function calling>"
+$env:NIM_BASE_URL = "https://integrate.api.nvidia.com/v1"
+.\.venv\Scripts\python.exe -m streamlit run app.py
+```
+
+Либо скопируйте `.streamlit/secrets.example.toml` в `.streamlit/secrets.toml` и заполните значения. Реальный `secrets.toml` игнорируется Git. Также ключ можно ввести в боковой панели Streamlit на время текущей сессии.
+
 ## Что работает сейчас
 
 - **Демонстрация**: вымышленные документы, потенциальная потеря функции, дублирование и конфликт интересов. Не требует ключа NIM.

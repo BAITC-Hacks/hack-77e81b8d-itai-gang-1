@@ -3,6 +3,7 @@
 import hashlib
 import json
 import logging
+import os
 
 import streamlit as st
 from pydantic import ValidationError
@@ -19,6 +20,47 @@ LABELS = {
     "removed": "Удалено", "transferred": "Передана", "lost": "Потенциально потеряна",
     "duplicated": "Дублируется", "new": "Новая",
 }
+
+DEFAULT_NIM_BASE_URL = "https://integrate.api.nvidia.com/v1"
+
+
+def secret_value(name):
+    try:
+        value = st.secrets.get(name, "")
+    except Exception:
+        return ""
+    return str(value).strip() if value else ""
+
+
+def configured_value(name, default=""):
+    return os.getenv(name) or secret_value(name) or default
+
+
+def apply_nim_settings(api_key, model, base_url):
+    api_key = api_key.strip()
+    model = model.strip()
+    base_url = base_url.strip()
+
+    if api_key:
+        os.environ["NVIDIA_API_KEY"] = api_key
+    elif not (os.getenv("NVIDIA_API_KEY") or os.getenv("NIM_API_KEY")):
+        secret_key = secret_value("NVIDIA_API_KEY") or secret_value("NIM_API_KEY")
+        if secret_key:
+            os.environ["NVIDIA_API_KEY"] = secret_key
+
+    if model:
+        os.environ["NIM_MODEL"] = model
+    elif secret_value("NIM_MODEL") and not os.getenv("NIM_MODEL"):
+        os.environ["NIM_MODEL"] = secret_value("NIM_MODEL")
+
+    if base_url:
+        os.environ["NIM_BASE_URL"] = base_url
+    elif secret_value("NIM_BASE_URL") and not os.getenv("NIM_BASE_URL"):
+        os.environ["NIM_BASE_URL"] = secret_value("NIM_BASE_URL")
+
+
+def nim_configured():
+    return bool((os.getenv("NVIDIA_API_KEY") or os.getenv("NIM_API_KEY")) and os.getenv("NIM_MODEL"))
 
 
 def input_key(before, after):
@@ -94,6 +136,24 @@ with st.sidebar:
     st.caption("1. Загрузите комплекты «до» и «после».\n\n"
                "2. Получите отчёт агента.\n\n3. Проверьте выводы по источникам.")
     st.info("Выводы ИИ носят рекомендательный характер и требуют проверки сотрудником.")
+    st.divider()
+    st.header("NIM API")
+    st.caption("Ключ можно задать через env, Streamlit secrets или только на текущую сессию.")
+    sidebar_api_key = st.text_input(
+        "NVIDIA_API_KEY",
+        type="password",
+        placeholder="Оставьте пустым, если ключ уже задан",
+    )
+    sidebar_model = st.text_input("NIM_MODEL", value=configured_value("NIM_MODEL"))
+    sidebar_base_url = st.text_input(
+        "NIM_BASE_URL",
+        value=configured_value("NIM_BASE_URL", DEFAULT_NIM_BASE_URL),
+    )
+    apply_nim_settings(sidebar_api_key, sidebar_model, sidebar_base_url)
+    if nim_configured():
+        st.success("NIM настроен")
+    else:
+        st.warning("Для анализа документов задайте NVIDIA_API_KEY и NIM_MODEL.")
 
 report = None
 origin = ""
@@ -130,7 +190,9 @@ else:
     if not ready:
         st.info("Анализ документов будет доступен после подключения модуля команды. "
                 "Сейчас можно посмотреть демонстрацию или открыть готовый JSON.")
-    if st.button("Сравнить документы", type="primary", disabled=not (ready and before and after)):
+    if ready and not nim_configured():
+        st.warning("Backend подключён, но NIM не настроен. Укажите API key и model в боковой панели.")
+    if st.button("Сравнить документы", type="primary", disabled=not (ready and before and after and nim_configured())):
         st.session_state.pop("analysis", None)
         try:
             with st.spinner("Агент сравнивает документы…"):
